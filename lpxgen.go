@@ -53,14 +53,6 @@ func (g *LPXGenerator) Generate(url string) *http.Request {
 	return request
 }
 
-func (g *LPXGenerator) Print() {
-	batchSize := g.Mincount + rand.Intn(g.Maxcount - g.Mincount)
-
-	for i := 0; i < batchSize; i++ {
-		fmt.Printf(g.Log.String())
-	}
-}
-
 func FormatSyslog(l Log) string {
 	return fmt.Sprintf("%s %s %s %s %s %s %s\n",
 		l.PrivalVersion(),

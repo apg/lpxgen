@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/apg/lpxgen"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -71,7 +72,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// url := flag.Arg(0)
+	url := flag.Arg(0)
 
 	if *minbatch > *maxbatch {
 		tmp := *minbatch
@@ -83,15 +84,14 @@ func main() {
 
 	gen := lpxgen.NewGenerator(*minbatch, *maxbatch, parseDist(*logdist))
 
-	// client := &http.Client{}
+	client := &http.Client{}
 	for i := 0; i < *count; i++ {
-		// req := gen.Generate(url)
+		req := gen.Generate(url)
 
-		// if resp, err := client.Do(req); err != nil {
-			// fmt.Fprintf(os.Stderr, "Error while performing request: %q\n", err)
-		// } else if resp.Status[0] != '2' {
-			// fmt.Fprintf(os.Stderr, "Non 2xx response recieved: %s\n", resp.Status)
-		// }
-		gen.Print()
+		if resp, err := client.Do(req); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while performing request: %q\n", err)
+		} else if resp.Status[0] != '2' {
+			fmt.Fprintf(os.Stderr, "Non 2xx response recieved: %s\n", resp.Status)
+		}
 	}
 }
