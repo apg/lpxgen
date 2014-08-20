@@ -67,8 +67,7 @@ func (p *ProbLog) String() string {
 	p.mutex.Lock()
 	p.currentLog = p.nextLog()
   s := FormatSyslog(p.currentLog)
-	fmt.Println(s)
-	return fmt.Sprintf("%d %s", len(s), s)
+	return fmt.Sprintf("%s", s)
 }
 
 func (p *ProbLog) nextLog() Log {
