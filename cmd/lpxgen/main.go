@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/apg/lpxgen"
 	"net/http"
+	"crypto/tls"
 	"os"
 	"strconv"
 	"strings"
@@ -84,7 +85,10 @@ func main() {
 
 	gen := lpxgen.NewGenerator(*minbatch, *maxbatch, parseDist(*logdist))
 
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 	for i := 0; i < *count; i++ {
 		req := gen.Generate(url)
 
