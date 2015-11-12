@@ -11,6 +11,15 @@ const (
 	TimeFormat = "2006-01-02T15:04:05.000000+00:00"
 )
 
+var (
+	UniqTokens int
+	TokenPool  map[string][]string
+)
+
+func init() {
+	TokenPool = make(map[string][]string)
+}
+
 type Log interface {
 	PrivalVersion() string
 	Time() string
@@ -48,8 +57,8 @@ func (g *LPXGenerator) Generate(url string) *http.Request {
 	request.Header.Add("Content-Length", string(body.Len()))
 	request.Header.Add("Content-Type", "application/logplex-1")
 	request.Header.Add("Logplex-Msg-Count", string(batchSize))
-	request.Header.Add("Logplex-Frame-Id", RandomFrameId())
-	request.Header.Add("Logplex-Drain-Token", RandomDrainToken())
+	request.Header.Add("Logplex-Frame-Id", randomFrameId())
+	request.Header.Add("Logplex-Drain-Token", randomToken("d."))
 	return request
 }
 
@@ -84,15 +93,24 @@ func UUID4() string {
 		randomHexString(12))
 }
 
-func RandomFrameId() string {
+func randomFrameId() string {
 	return randomHexString(32)
 }
 
-func RandomDrainToken() string {
-	return fmt.Sprintf("t.%s", UUID4())
+func randomToken(prefix string) string {
+	tokens, ok := TokenPool[prefix]
+	if !ok {
+		tokens := make([]string, UniqTokens)
+		for i := 0; i < UniqTokens; i++ {
+			tokens[i] = prefix + UUID4()
+		}
+		TokenPool[prefix] = tokens
+	}
+
+	return tokens[rand.Intn(len(tokens))]
 }
 
-func RandomIPv4() string {
+func randomIPv4() string {
 	return fmt.Sprintf("%d.%d.%d.%d",
 		rand.Intn(255),
 		rand.Intn(255),

@@ -3,67 +3,34 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/apg/lpxgen"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
+
+	"github.com/apg/lpxgen"
 )
 
 var (
-	count = flag.Int("count", 1000, "Number of batches to send")
-	minbatch = flag.Int("min", 1, "Minimum number of messages in a batch")
-	maxbatch = flag.Int("max", 100, "Maximum number of messages in a batch")
-	logdist = flag.String("dist", "default", "Distribution of log types. <type>:0.9,<type>:0.1")
+	count      = flag.Int("count", 1000, "Number of batches to send")
+	uniqTokens = flag.Int("tokens", 10, "Number of tokens to utilize")
+	minbatch   = flag.Int("min", 1, "Minimum number of messages in a batch")
+	maxbatch   = flag.Int("max", 100, "Maximum number of messages in a batch")
+	logdist    = flag.String("dist", "default", "Distribution of log types. <type>:0.9,<type>:0.1")
 )
-
-func logFromString(l string) lpxgen.Log {
-	switch l {
-	case "router":
-    return lpxgen.Router
-	case "dynomem":
-		return lpxgen.DynoMem
-	case "dynoload":
-		return lpxgen.DynoLoad
-	case "default":
-		return lpxgen.DefaultLog{}
-	default:
-		fmt.Fprintf(os.Stderr, "WARNING: Invalid logtype %q: returning DefaultLog\n", l)
-		return lpxgen.DefaultLog{}
-	}
-}
-
-func parseDist(ds string) lpxgen.Log {
-	logs := make(map[lpxgen.Log]float32)
-
-	bits := strings.Split(ds, ",")
-	for _, bit := range bits {
-		logspec := strings.Split(bit, ":")
-		switch len(logspec) {
-		case 2:
-			if val, err := strconv.ParseFloat(logspec[1], 32); err != nil {
-				fmt.Printf("Invalid log spec: %q is not a valid number\n", logspec[1])
-				os.Exit(1)
-			} else {
-				logs[logFromString(logspec[0])] = float32(val)
-			}
-		case 1:
-			logs[logFromString(logspec[0])] = float32(1.0 / len(bits))
-		default:
-			fmt.Printf("Invalid log spec: %q\n", bit)
-			os.Exit(1)
-		}
-	}
-
-	return lpxgen.NewProbLog(logs)
-}
 
 func main() {
 	flag.Parse()
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [options] URL\n", os.Args[0])
-    flag.PrintDefaults()
+		flag.PrintDefaults()
+	}
+
+	if *uniqTokens > 0 {
+		lpxgen.UniqTokens = *uniqTokens
+	} else {
+		fmt.Fprintf(os.Stderr, "ERROR: tokens must be greater than 0\n\n")
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	if flag.NArg() != 1 {
@@ -79,10 +46,10 @@ func main() {
 		*minbatch = *maxbatch
 		*maxbatch = tmp
 	} else if *minbatch == *maxbatch {
-		*maxbatch += 1
+		*maxbatch++
 	}
 
-	gen := lpxgen.NewGenerator(*minbatch, *maxbatch, parseDist(*logdist))
+	gen := lpxgen.NewGenerator(*minbatch, *maxbatch, lpxgen.ProbLogFromString(*logdist))
 
 	client := &http.Client{}
 	for i := 0; i < *count; i++ {

@@ -44,12 +44,8 @@ func (d HerokuLog) Hostname() string {
 
 func (d HerokuLog) Name() string {
 	switch d {
-	case Router:
-		return RandomDrainToken()
-	case DynoMem:
-		return RandomDrainToken()
-	case DynoLoad:
-		return RandomDrainToken()
+	case Router, DynoMem, DynoLoad:
+		return randomToken("t.")
 	}
 	return "localhost"
 }
@@ -73,12 +69,12 @@ func (d HerokuLog) Msgid() string {
 func (d HerokuLog) Msg() string {
 	switch d {
 	case Router:
-		return fmt.Sprintf(`at=info method=%s path="%s" host=%s.herokuapp.com request_id=%s fwd="%s" dyno=web.1 connect=%dms service=%dms status=%s bytes=%d`,
+		return fmt.Sprintf(`at=info method=%s path="%s" host=%s.herokuapp.com request_id=%s fwd="%s" dyno=web.1 connect=%d service=%d status=%s bytes=%d`,
 			methods[rand.Intn(len(methods))],
 			paths[rand.Intn(len(paths))],
 			randomHexString(8),
 			UUID4(),
-			RandomIPv4(),
+			randomIPv4(),
 			rand.Intn(100),
 			rand.Intn(600),
 			statuses[rand.Intn(len(statuses))],
