@@ -100,7 +100,7 @@ func randomFrameId() string {
 func randomToken(prefix string) string {
 	tokens, ok := TokenPool[prefix]
 	if !ok {
-		tokens := make([]string, UniqTokens)
+		tokens = make([]string, UniqTokens)
 		for i := 0; i < UniqTokens; i++ {
 			tokens[i] = prefix + UUID4()
 		}
