@@ -1,9 +1,6 @@
 package lpxgen
 
-import (
-	"fmt"
-	"time"
-)
+import "fmt"
 
 type DefaultLog struct{}
 
@@ -12,7 +9,7 @@ func (d DefaultLog) PrivalVersion() string {
 }
 
 func (d DefaultLog) Time() string {
-	return time.Now().UTC().Format(TimeFormat)
+	return DefaultClock.Now().UTC().Format(TimeFormat)
 }
 
 func (d DefaultLog) Hostname() string {

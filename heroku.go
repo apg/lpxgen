@@ -3,7 +3,6 @@ package lpxgen
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
 type HerokuLog int
@@ -35,7 +34,7 @@ func (d HerokuLog) PrivalVersion() string {
 }
 
 func (d HerokuLog) Time() string {
-	return time.Now().UTC().Format(TimeFormat)
+	return DefaultClock.Now().UTC().Format(TimeFormat)
 }
 
 func (d HerokuLog) Hostname() string {
