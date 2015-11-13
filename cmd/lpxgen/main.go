@@ -15,6 +15,8 @@ var (
 	minbatch   = flag.Int("min", 1, "Minimum number of messages in a batch")
 	maxbatch   = flag.Int("max", 100, "Maximum number of messages in a batch")
 	logdist    = flag.String("dist", "default", "Distribution of log types. <type>:0.9,<type>:0.1")
+	startTime  = flag.String("start-time", "", "Start time")
+	step       = flag.String("step", "1s", "Time increment per each logline")
 )
 
 func main() {
@@ -47,6 +49,17 @@ func main() {
 		*maxbatch = tmp
 	} else if *minbatch == *maxbatch {
 		*maxbatch++
+	}
+
+	if len(*startTime) >= 0 {
+		clock, err := lpxgen.NewMonotonicClock(*startTime, *step)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR: couldn't create a clock: %q\n\n", err)
+			flag.Usage()
+			os.Exit(1)
+		}
+
+		lpxgen.DefaultClock = clock
 	}
 
 	gen := lpxgen.NewGenerator(*minbatch, *maxbatch, lpxgen.ProbLogFromString(*logdist))
