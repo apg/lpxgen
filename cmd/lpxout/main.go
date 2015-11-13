@@ -52,6 +52,6 @@ func main() {
 	log := lpxgen.ProbLogFromString(*logdist)
 
 	for i := 0; i < *count; i++ {
-		print(log.String())
+		fmt.Print(log.String())
 	}
 }
